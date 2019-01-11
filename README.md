@@ -10,7 +10,7 @@ This is the PyTorch implementation of our paper:
 International Conference on Learning Representations (ICLR), 2019<br>
 **(Top 5% of reviews)**<br>
 
-[[arXiv]](https://arxiv.org/abs/1901.03035)] [[GitHub](https://github.com/chihyaoma/selfmonitoring-agent)] [[Project](https://chihyaoma.github.io/project/2018/09/27/selfmonitoring.html)]
+[[arXiv](https://arxiv.org/abs/1901.03035)] [[GitHub](https://github.com/chihyaoma/selfmonitoring-agent)] [[Project](https://chihyaoma.github.io/project/2018/09/27/selfmonitoring.html)]
 [[OpenReview](https://openreview.net/forum?id=r1GAsjC5Fm)]
 
 <p align="center">
@@ -338,6 +338,6 @@ If you find this repository useful, please cite our paper:
     author={Chih-Yao Ma and Jiasen Lu and Zuxuan Wu and Ghassan AlRegib and Zsolt Kira and Richard Socher and Caiming Xiong},
     booktitle={Proceedings of the International Conference on Learning Representations (ICLR)},
     year={2019},
-    url={https://openreview.net/forum?id=r1GAsjC5Fm},
+    url={https://arxiv.org/abs/1901.03035},
 }
 ```
