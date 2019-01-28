@@ -8,7 +8,7 @@ This is the PyTorch implementation of our paper:
 [__***Chih-Yao Ma***__](https://chihyaoma.github.io/), [Jiasen Lu](https://www.cc.gatech.edu/~jlu347/), [Zuxuan Wu](http://zxwu.azurewebsites.net/), [Ghassan AlRegib](https://ghassanalregib.com/), [Zsolt Kira](https://www.cc.gatech.edu/~zk15/), 
 [Richard Socher](https://www.socher.org/), [Caiming Xiong](http://www.stat.ucla.edu/~caiming/)<br>
 International Conference on Learning Representations (ICLR), 2019<br>
-**(Top 5% of reviews)**<br>
+**(Top 7% of reviews)**<br>
 
 [[arXiv](https://arxiv.org/abs/1901.03035)] [[GitHub](https://github.com/chihyaoma/selfmonitoring-agent)] [[Project](https://chihyaoma.github.io/project/2018/09/27/selfmonitoring.html)]
 [[OpenReview](https://openreview.net/forum?id=r1GAsjC5Fm)]
