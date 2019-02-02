@@ -146,30 +146,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
         self.feedback = feedback
         self.episode_len = episode_len
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        # if 'regret' in opts.arch:
-        #     self.ignore_index = opts.max_navigable + 1  # we define (max_navigable+1) as ignore since 15(navigable) + 1(STOP)
-        #     self.criterion = nn.NLLLoss(ignore_index=self.ignore_index)
-        # elif 'sentinel' == opts.arch:
-        #     self.ignore_index = opts.max_navigable + 2  # +2 because we need 15(navigable) + 1(STOP) + 1(MOVE)
-        #     self.criterion = SentinelCriterion()
-        # elif 'end_as_sentinel' == opts.arch:
-        #     self.ignore_index = opts.max_navigable + 1
-        #     self.criterion = nn.NLLLoss(ignore_index=self.ignore_index)
-        # elif 'sentinel_double_loss' == opts.arch:
-        #     self.ignore_index = opts.max_navigable
-        #     # self.end_move_criterion = nn.NLLLoss()
-        #     self.end_move_criterion = nn.NLLLoss(ignore_index=2)  # 0: stop, 1: move, 2: ignore
-        #     self.move_criterion = nn.NLLLoss(ignore_index=self.ignore_index)
-        # elif 'stop_move_actions' == opts.arch:
-        #     self.ignore_index = opts.max_navigable
-        #     self.end_move_criterion = nn.CrossEntropyLoss(ignore_index=2)  # 0: stop, 1: move, 2: ignore
-        #     self.move_criterion = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
-        # elif 'inspir_merge' == opts.arch:
-        #     self.ignore_index = opts.max_navigable + 1  # we define (max_navigable+1) as ignore since 15(navigable) + 1(STOP)
-        #     self.criterion = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
-        #     # self.criterion = nn.CrossEntropyLoss(ignore_index=self.ignore_index, reduction='sum')
-        # else:
         
         self.ignore_index = opts.max_navigable + 1  # we define (max_navigable+1) as ignore since 15(navigable) + 1(STOP)
         self.criterion = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
@@ -190,7 +166,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             value_target.append(dist_improved_from_start)
 
             if dist <= 3.0:  # if we are less than 3m away from the goal
-            # if dist < 3.0:  # if we are less than 3m away from the goal
                 value_target[-1] = 1
 
             # if ended, let us set the target to be the value so that MSE loss for that sample with be 0
@@ -219,7 +194,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
 
             value_target.append(dist_improved_from_start)
 
-            # if dist <= 3.0:  # if we are less than 3m away from the goal
             if dist < 3.0:  # if we are less than 3m away from the goal
                 value_target[-1] = 1
 
@@ -627,8 +601,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             # =====================================================================
             # find the viewpoint with highest progress monitor output, and only keep the beams from that viewpoint
             progress_monitor_output = new_log_values.exp()
-            # progress_monitor_output = new_log_values.exp() * beam_seq_logprobs[step].exp().unsqueeze(1)
-            # progress_monitor_output = new_log_values.exp() + beam_seq_logprobs[step].exp().unsqueeze(1)
 
             # the progress monitor output is ordered according to the action probability
             # we will sequentially find the progress monitor output that is higher than previous one
@@ -822,7 +794,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
         if len(next_viewpoints) < beam_size:
             # if avoiding the visited states, we might not have enough candidates for number of beams
             # in this case, we replicate from the existed beams
-
             replicate_idx = 0
 
             missing_length = beam_size - len(next_viewpoints)
@@ -835,7 +806,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             beam_seq[:, -missing_length:] = beam_seq[:, replicate_idx].unsqueeze(1).expand(-1, missing_length)
             beam_seq_logprobs[:, -missing_length:] = beam_seq_logprobs[:, replicate_idx].unsqueeze(1).expand(-1, missing_length)
             beam_logprobs_sum[-missing_length:] = beam_logprobs_sum[replicate_idx].expand(missing_length)
-            # beam_logprobs_sum[-missing_length:] = torch.zeros(missing_length).fill_(-float('inf'))
 
             new_ended[-missing_length:] = [new_ended[replicate_idx]] * missing_length
             new_last_recorded[-missing_length:] = [new_last_recorded[replicate_idx]] * missing_length
@@ -878,7 +848,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
         seq, seq_lengths = super(PanoSeq2SeqAgent, self)._sort_batch(obs)
         ctx, h_t, c_t, ctx_mask = self.encoder(seq, seq_lengths)
 
-        # seqLogprobs = torch.FloatTensor(self.opts.max_episode_len, batch_size)
         self.done_beams = [[] for _ in range(batch_size)]
         batch_traj = []
 
@@ -903,7 +872,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             tmp_question = h_t[k:k + 1].expand(beam_size, h_t.size(1))
             tmp_pre_ctx_attend = torch.zeros(beam_size, self.opts.rnn_hidden_size).to(self.device)
 
-            # tmp_seen_feat = torch.zeros(beam_size, 1, self.opts.img_fc_dim[-1]).to(self.device)
             tmp_seen_feat = torch.zeros(beam_size, 1, self.opts.rnn_hidden_size).to(self.device)
 
             traj, scan_id = [], []
@@ -923,16 +891,11 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                     'distance': [super(PanoSeq2SeqAgent, self)._get_distance(ob)]
                 })
                 scan_id.append(ob['scan'])
-                # if ob['viewpoint'] not in self.visited_state:
-                    # self.visited_state.append(ob['viewpoint'])
                 if (ob['viewpoint'], ob['heading']) not in self.visited_state:
                     self.visited_state.append((ob['viewpoint'], ob['heading']))
 
             ended = np.array([False] * beam_size)
             last_recorded = np.array([False] * beam_size)
-
-            # viewpoints, navigable_index, navigable_feat, tmp_h_t, tmp_c_t, logit, \
-            # ctx_attn = self.model_step(tmp_obs, ended, tmp_pre_feat, tmp_question, tmp_h_t, tmp_c_t, tmp_ctx, tmp_pre_ctx_attend, tmp_ctx_mask)
 
             viewpoints, navigable_index, navigable_feat, tmp_h_t, tmp_c_t, logit, value, tmp_img_attn, tmp_ctx_attn, \
             tmp_pre_ctx_attend = self.model_seen_step(tmp_obs, ended, tmp_pre_feat, tmp_h_t, tmp_c_t, tmp_ctx, tmp_ctx_mask,
@@ -941,17 +904,11 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             logprobs = F.log_softmax(logit, dim=1)
             logprobs_value = ((value + 1) / 2).log()
 
-            # self.done_beams[k] = self.beam_search(k, logprobs, tmp_obs, traj, ended, last_recorded, viewpoints,
-            #                                       navigable_index, navigable_feat, tmp_pre_feat, tmp_ctx, tmp_h_t,
-            #                                       tmp_c_t, tmp_ctx_mask, beam_size, tmp_seen_feat, tmp_question, tmp_pre_ctx_attend)
             self.done_beams[k] = self.beam_search(k, logprobs, tmp_obs, traj, ended, last_recorded,
                                                   viewpoints, navigable_index, navigable_feat, tmp_pre_feat,
                                                   tmp_ctx, tmp_img_attn, tmp_ctx_attn, tmp_h_t,
                                                   tmp_c_t, tmp_ctx_mask, beam_size,
                                                   tmp_seen_feat, tmp_question, tmp_pre_ctx_attend, logprobs_value)
-
-            # if self.opts.merge_traj_submission:
-            #     self.done_beams[k][0]['traj']['path'] = self.merge_all_traj(self.all_visited_traj, ob['scan'])
 
             batch_traj.append(self.done_beams[k][0]['traj'])
 
@@ -961,108 +918,10 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                     navigable_feat, tmp_pre_feat, tmp_ctx, tmp_img_attn, tmp_ctx_attn, tmp_h_t, tmp_c_t, tmp_ctx_mask,
                     beam_size, tmp_seen_feat, tmp_question, tmp_pre_ctx_attend, logprobs_value=None):
 
-        # def beam_step(visited_state, batch_idx, scan_id, logprobsf, beam_size, step, beam_seq, beam_seq_logprobs,
-        #               beam_logprobs_sum, state):
-        #     ys, ix = torch.sort(logprobsf, 1, True)
-        #     candidates = []
-        #     cols = min(beam_size, ys.size(1))
-        #     rows = beam_size
-        #
-        #     # if this is the first step, we will just use the 1st row
-        #     # instead of use the number of beams
-        #     if step == 0:
-        #         rows = 1
-        #
-        #     for c in range(cols):  # for each column (word, essentially)
-        #         for q in range(rows):  # for each beam expansion
-        #             # compute logprob of expanding beam q with word in (sorted) position c
-        #             local_logprob = ys[q, c]
-        #             candidate_logprob = beam_logprobs_sum[q] + local_logprob
-        #             candidates.append({'c': ix[q, c], 'q': q, 'p': candidate_logprob, 'r': local_logprob})
-        #     candidates = sorted(candidates, key=lambda x: -x['p'])
-        #
-        #     # let us duplicate the state and then we will more stuffs around
-        #     tmp_obs, traj, ended, last_recorded, viewpoints, navigable_index, navigable_feat, tmp_pre_feat, tmp_h_t, tmp_c_t, tmp_ctx, tmp_ctx_mask = state
-        #
-        #     new_traj = copy.deepcopy(traj)
-        #     new_ended = ended.copy()
-        #     new_last_recorded = last_recorded.copy()
-        #     new_pre_feat = tmp_pre_feat.clone()
-        #     new_tmp_h_t = tmp_h_t.clone()
-        #     new_tmp_c_t = tmp_c_t.clone()
-        #     new_tmp_ctx = tmp_ctx.clone()
-        #     new_tmp_ctx_mask = tmp_ctx_mask.clone()
-        #
-        #     if step >= 1:
-        #         # we need these as reference when we fork beams around
-        #         beam_seq_prev = beam_seq[:step].clone()
-        #         beam_seq_logprobs_prev = beam_seq_logprobs[:step].clone()
-        #
-        #     next_viewpoint_idx, next_viewpoints, next_headings = [], [], []
-        #
-        #     for vix in range(beam_size):
-        #         v = candidates[vix]
-        #
-        #         # fork beam index q into index vix
-        #         if step >= 1:
-        #             beam_seq[:step, vix] = beam_seq_prev[:, v['q']]
-        #             beam_seq_logprobs[:step, vix] = beam_seq_logprobs_prev[:, v['q']]
-        #
-        #         # append new end terminal at the end of this beam
-        #         beam_seq_logprobs[step, vix] = v['r']  # the raw logprob here
-        #         beam_logprobs_sum[vix] = v['p']  # the new (sum) logprob along this beam
-        #
-        #         # move the old info to its new location
-        #         new_tmp_h_t[vix] = tmp_h_t[v['q']]
-        #         new_tmp_c_t[vix] = tmp_c_t[v['q']]
-        #         new_tmp_ctx[vix] = tmp_ctx[v['q']]
-        #         new_tmp_ctx_mask[vix] = tmp_ctx_mask[v['q']]
-        #
-        #         new_ended[vix] = ended[v['q']]
-        #         new_last_recorded[vix] = last_recorded[v['q']]
-        #         new_traj[vix] = copy.deepcopy(traj[v['q']])
-        #
-        #         # given the candidates, let us take the action on env, obtain new ob, record with new traj
-        #         action = v['c']  # tensor([])
-        #
-        #         # if the selected action is not 0, means we picked a navigable direction
-        #         # but, the probability can not be -inf because that was the direction we masked out before
-        #         if action >= 1 and v['p'] != -float('inf'):
-        #             next_viewpoint_idx.append(navigable_index[v['q']][action - 1])
-        #             new_pre_feat[vix] = navigable_feat[v['q'], action, :]
-        #             # next_viewpoints.append(viewpoints[vix][action])
-        #             next_viewpoints.append(viewpoints[v['q']][action])
-        #             beam_seq[step, vix] = v['c']  # c'th word is the continuation, i.e. the navigable direction selected
-        #         else:
-        #             next_viewpoint_idx.append('STAY')
-        #             new_ended[vix] = True
-        #             new_pre_feat[vix] = navigable_feat[v['q'], 0, :]
-        #             next_viewpoints.append(viewpoints[v['q']][0])
-        #             beam_seq[step, vix] = torch.tensor(0).long()
-        #         next_headings.append(tmp_obs[v['q']]['navigableLocations'][next_viewpoints[vix]]['heading'])
-        #
-        #     # move within the env
-        #     new_tmp_obs = self.env.teleport_beam(batch_idx, scan_id, next_viewpoints, next_headings)
-        #
-        #     for vix, ob in enumerate(new_tmp_obs):
-        #         if not new_ended[vix]:
-        #             new_traj[vix]['path'].append((ob['viewpoint'], ob['heading'], ob['elevation']))
-        #             dist = super(PanoSeq2SeqAgent, self)._get_distance(ob)
-        #             new_traj[vix]['distance'].append(dist)
-        #             # new_traj[vix]['ctx_attn'].append(ctx_attn[i].detach().cpu().numpy().tolist())
-        #             new_traj[vix]['viewpoint_idx'].append(next_viewpoint_idx[vix])
-        #             new_traj[vix]['length'] += 1
-        #             new_last_recorded[vix] = True if new_ended[vix] else False
-        #
-        #     state = new_tmp_obs, new_traj, new_ended, new_last_recorded, new_pre_feat, new_tmp_h_t, new_tmp_c_t, new_tmp_ctx, new_tmp_ctx_mask
-        #
-        #     return beam_seq, beam_seq_logprobs, beam_logprobs_sum, state, candidates
-
         def beam_step_state_factored(visited_state, batch_idx, scan_id, logprobsf, beam_size, step, beam_seq,
                                      beam_seq_logprobs, beam_logprobs_sum, state, logprobsf_value=None):
             if logprobsf_value is not None:
                 ys, ix = torch.sort(logprobsf_value.repeat(1, logprobsf.size(1)) + logprobsf, 1, True)
-                # ys, ix = torch.sort(((logprobsf_value.exp().repeat(1, logprobsf.size(1)) + logprobsf.exp()) / 2).log(), 1, True)
             else:
                 ys, ix = torch.sort(logprobsf, 1, True)
 
@@ -1118,7 +977,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
 
             num_candidate_routes = 1 if self.opts.progress_inference else beam_size
             while beam_idx < num_candidate_routes and cand_idx < len(candidates):
-            # for vix in range(beam_size):
                 v = candidates[cand_idx]
 
                 # given the candidates, let us take the action on env, obtain new ob, record with new traj
@@ -1135,7 +993,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                     if (next_viewpoint, next_heading) not in visited_state:
                     # if next_viewpoint not in visited_state:
                         visited_state.append((next_viewpoint, next_heading))
-                        # visited_state.append(next_viewpoint)
 
                         next_viewpoint_idx.append(navigable_index[v['q']][action - 1])
                         new_pre_feat[beam_idx] = navigable_feat[v['q'], action, :]
@@ -1153,7 +1010,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                 next_headings.append(tmp_obs[v['q']]['navigableLocations'][next_viewpoints[beam_idx]]['heading'])
                 new_navigable_index.append(navigable_index[v['q']])
                 new_value[beam_idx] = value[v['q']]
-                # new_value.append(v['r'].exp())
 
                 # fork beam index q into index beam_idx
                 if step >= 1:
@@ -1186,7 +1042,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             if len(next_viewpoints) < beam_size:
                 # if avoiding the visited states, we might not have enough candidates for number of beams
                 # in this case, we replicate from the existed beams
-
                 replicate_idx = 0
 
                 missing_length = beam_size - len(next_viewpoints)
@@ -1198,7 +1053,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
 
                 beam_seq[:, -missing_length:] = beam_seq[:, replicate_idx].unsqueeze(1).expand(-1, missing_length)
                 beam_seq_logprobs[:, -missing_length:] = beam_seq_logprobs[:, replicate_idx].unsqueeze(1).expand(-1, missing_length)
-                # beam_logprobs_sum[-missing_length:] = beam_logprobs_sum[replicate_idx].expand(missing_length)
                 beam_logprobs_sum[-missing_length:] = torch.zeros(missing_length).fill_(-float('inf'))
 
                 new_ended[-missing_length:] = [new_ended[replicate_idx]] * missing_length
@@ -1230,7 +1084,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                     new_traj[vix]['length'] += 1
                     new_last_recorded[vix] = True if new_ended[vix] else False
 
-            # state = new_tmp_obs, new_traj, new_ended, new_last_recorded, new_pre_feat, new_tmp_h_t, new_tmp_c_t, new_tmp_ctx, new_tmp_ctx_mask
             state = new_tmp_obs, new_traj, new_ended, new_last_recorded, new_pre_feat, new_tmp_h_t, new_tmp_c_t, \
                     new_tmp_ctx, new_tmp_img_attn, new_tmp_ctx_attn, new_tmp_ctx_mask, new_tmp_seen_feat, new_tmp_question, new_tmp_pre_ctx_attend
 
@@ -1244,7 +1097,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
         scan_id = [_['scan'] for _ in tmp_obs]
 
         for step in range(self.opts.max_episode_len):
-            # logprobsf = logprobs.data.float()  # lets go to CPU for more efficiency in indexing operations
             logprobsf = logprobs.data
             if logprobs_value is not None:
                 logprobsf_value = logprobs_value.data
@@ -1252,12 +1104,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
             state = tmp_obs, traj, ended, last_recorded, viewpoints, navigable_index, navigable_feat, tmp_pre_feat, \
                     tmp_h_t, tmp_c_t, tmp_ctx, tmp_img_attn, tmp_ctx_attn, tmp_ctx_mask, tmp_seen_feat, tmp_question, tmp_pre_ctx_attend
 
-            # beam_seq, \
-            # beam_seq_logprobs, \
-            # beam_logprobs_sum, \
-            # state, \
-            # candidates_divm = beam_step_state_factored(self.visited_state, batch_idx, scan_id, logprobsf, beam_size,
-            #                                            step, beam_seq, beam_seq_logprobs, beam_logprobs_sum, state)
             beam_seq, \
             beam_seq_logprobs, \
             beam_logprobs_sum, \
@@ -1267,7 +1113,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                                                        logprobsf_value)
 
             # get the new sorted state
-            # tmp_obs, traj, ended, last_recorded, tmp_pre_feat, tmp_h_t, tmp_c_t, tmp_ctx, tmp_ctx_mask = state
             tmp_obs, traj, ended, last_recorded, tmp_pre_feat, tmp_h_t, tmp_c_t, tmp_ctx, tmp_img_attn, tmp_ctx_attn, \
             tmp_ctx_mask, tmp_seen_feat, tmp_question, tmp_pre_ctx_attend = state
 
@@ -1283,11 +1128,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                         # for all past trajs, we check one-by-one for each viewpoint, to see if there is
                         # overlap with the current path
                         for vs_idx, visited_states in enumerate(self.all_visited_traj):
-
-                            # # get the viewpoint of last visited state
-                            # if visited_states[-2][0] == current_path[-2][0] and len(visited_states) == len(current_path) and len(current_path) > 1:
-                            #     self.all_visited_traj.insert(vs_idx, current_path)
-                            #     break
 
                             insert_idx = -1
                             for vp_idx, (viewpoint, _, _) in enumerate(visited_states):
@@ -1317,10 +1157,6 @@ class PanoSeq2SeqAgent(PanoBaseAgent):
                         done_beams.append(final_beam)
                         # don't continue beams from finished sequences
                         beam_logprobs_sum[vix] = -float('inf')
-
-            # viewpoints, navigable_index, navigable_feat, tmp_h_t, tmp_c_t, logit, \
-            # ctx_attn = self.model_step(tmp_obs, ended, tmp_pre_feat, tmp_question, tmp_h_t, tmp_c_t, tmp_ctx,
-            #                            tmp_pre_ctx_attend, tmp_ctx_mask)
 
             viewpoints, navigable_index, navigable_feat, tmp_h_t, tmp_c_t, logit, value, tmp_img_attn, tmp_ctx_attn, \
             tmp_pre_ctx_attend = self.model_seen_step(tmp_obs, ended, tmp_pre_feat, tmp_h_t, tmp_c_t,
