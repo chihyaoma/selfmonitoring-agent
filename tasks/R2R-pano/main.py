@@ -59,8 +59,6 @@ parser.add_argument('--max_navigable', default=16, type=int,
                          we add one because the agent can decide to stay at its current location')
 parser.add_argument('--use_ignore_index', default=1, type=int,
                     help='ignore target after agent has ended')
-parser.add_argument('--second_training', default=0, type=int,
-                    help='2nd stage of training on val_seen, evaluating on val_unseen')
 
 # Agent options
 parser.add_argument('--follow_gt_traj', default=0, type=int,
@@ -91,12 +89,11 @@ parser.add_argument('--monitor_sigmoid', default=0, type=int,
 
 # Image context
 parser.add_argument('--img_feat_input_dim', default=2176, type=int,
-                    help='ResNet-152: 2048, if use angle, the input is 2176 | 2208, if marked with visited')
+                    help='ResNet-152: 2048, if use angle, the input is 2176')
 parser.add_argument('--img_fc_dim', default=(128,), nargs="+", type=int)
 parser.add_argument('--img_fc_use_batchnorm', default=1, type=int)
 parser.add_argument('--img_dropout', default=0.5, type=float)
-parser.add_argument('--mlp_relu', default=1, type=int,
-                    help='Use ReLu in MLP module')
+parser.add_argument('--mlp_relu', default=1, type=int, help='Use ReLu in MLP module')
 parser.add_argument('--img_fc_use_angle', default=1, type=int,
                     help='add relative heading and elevation angle into image feature')
 
@@ -105,20 +102,15 @@ parser.add_argument('--remove_punctuation', default=0, type=int,
                     help='the original ''encode_sentence'' does not remove punctuation'
                          'we provide an option here.')
 parser.add_argument('--reversed', default=1, type=int,
-                    help='the original ''encode_sentence'' reverse the sentence'
-                         'we provide an option here.')
-parser.add_argument('--lang_embed', default='lstm', type=str,
-                    help='options: lstm')
+                    help='option for reversing the sentence during encoding')
+parser.add_argument('--lang_embed', default='lstm', type=str, help='options: lstm ')
 parser.add_argument('--word_embedding_size', default=256, type=int,
                     help='default embedding_size for language encoder')
 parser.add_argument('--rnn_hidden_size', default=256, type=int)
 parser.add_argument('--bidirectional', default=0, type=int)
 parser.add_argument('--rnn_num_layers', default=1, type=int)
 parser.add_argument('--rnn_dropout', default=0.5, type=float)
-parser.add_argument('--max_cap_length', default=80, type=int,
-                    help='maximum length of captions')
-parser.add_argument('--max_sentence_segs', default=20, type=int,
-                    help='maximum number of sentence segments for each instruction')
+parser.add_argument('--max_cap_length', default=80, type=int, help='maximum length of captions')
 
 # Evaluation options
 parser.add_argument('--eval_only', default=0, type=int,
@@ -276,7 +268,6 @@ def main(opts):
 
         if epoch % opts.eval_every_epochs == 0:
             success_rate = []
-            sr_ne = []
             for val_env in val_envs.items():
                 success_rate.append(trainer.eval(epoch, val_env, tb_logger))
 

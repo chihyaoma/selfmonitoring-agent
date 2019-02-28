@@ -29,9 +29,6 @@ class PanoSeq2SeqTrainer():
         self.agent.encoder.train()
         self.agent.model.train()
 
-        if self.opts.second_training:
-            self.agent.model.first_stage_model.training = False
-
         self.agent.feedback = self.opts.feedback_training
         self.agent.value_loss = None
         self.agent.val_acc = None

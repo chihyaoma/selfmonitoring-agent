@@ -1,4 +1,5 @@
 ## Self-Monitoring Navigation Agent for Vision-and-Language Navigation
+<img src="teaser/pytorch-logo-dark.png" width="10%"> [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 
 This is the PyTorch implementation of our paper:
 <img align="right" src="teaser/einstein-scroll.png" width="5%">
