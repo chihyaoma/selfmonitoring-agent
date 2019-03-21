@@ -325,7 +325,8 @@ CUDA_VISIBLE_DEVICES=0 python tasks/R2R-pano/main.py \
     --fix_action_ended 0 \
     --resume 'best' \  # resume from best performing model
     --eval_only 1 \
-    --progress_inference 1  # use progress inference for evaluation
+    --progress_inference 1 \  # use progress inference for evaluation
+    --beam_size 5  # this precomputes the progress monitor for 5 navigable directions
 ```
 
 #### Reproducibility
