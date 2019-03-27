@@ -338,7 +338,10 @@ Please open an issue or contact [Chih-Yao Ma](https://chihyaoma.github.io) if yo
 <img src="teaser/tb-training.png" width="100%">
 </p>
 
+## Acknowledgments
+This research was partially supported by DARPAs Lifelong Learning Machines (L2M) program, under Cooperative Agreement HR0011-18-2-001. We thank the authors from Speaker-Follower [arXiv](https://arxiv.org/abs/1806.02724), Ronghang Hu and Daniel Fried, for communicating with us and providing details of the implementation and synthetic instructions for fair comparison.
 
+## Citation
 If you find this repository useful, please cite our paper:
 
 ```
